@@ -1,11 +1,12 @@
 // A1 night depot: the fleet as 3D trucks parked in their bays (US-01, FR-01–FR-03).
 // Models: Kenney Car Kit (CC0, www.kenney.nl), bundled into the app as data URLs — no network (NFR-09).
 // Colours come from the CSS tokens at runtime, so the 3D scene follows design.md like the rest of the app.
-import { Grid, OrbitControls, useGLTF } from '@react-three/drei';
+import { Grid, OrbitControls } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Bloom, EffectComposer, Vignette } from '@react-three/postprocessing';
-import { Suspense, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
+import { Suspense, use, useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { Truck } from '../types/domain';
 import deliveryFlat from '../assets/models/delivery-flat.glb?inline';
@@ -19,7 +20,22 @@ const MODEL = {
   heavyDiesel: deliveryFlat,
   mediumDiesel: deliveryFlat,
 };
-Object.values(MODEL).forEach((m) => useGLTF.preload(m, false));
+// Parse the inlined GLB bytes directly: no fetch() at all, so it also works under the
+// strict content security policy of the hosted prototype (NFR-09).
+const loader = new GLTFLoader();
+const cache = new Map<string, Promise<GLTF>>();
+function loadModel(dataUrl: string): Promise<GLTF> {
+  let p = cache.get(dataUrl);
+  if (!p) {
+    const bin = atob(dataUrl.slice(dataUrl.indexOf(',') + 1));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    p = loader.parseAsync(bytes.buffer, '');
+    cache.set(dataUrl, p);
+  }
+  return p;
+}
+Object.values(MODEL).forEach((m) => { void loadModel(m); });
 
 function token(name: string): string {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -52,7 +68,7 @@ function TruckModel({ truck, index, count, selected, onSelect, colors }: {
 }) {
   const ev = truck.powertrain === 'electric';
   const url = truck.weightClass === 'heavy' ? (ev ? MODEL.heavyEv : MODEL.heavyDiesel) : (ev ? MODEL.mediumEv : MODEL.mediumDiesel);
-  const { scene } = useGLTF(url, false);
+  const { scene } = use(loadModel(url));
   const [hover, setHover] = useState(false);
   const pos = bayPosition(index, count);
 
