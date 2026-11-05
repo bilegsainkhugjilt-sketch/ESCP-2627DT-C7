@@ -140,7 +140,7 @@ The prototype covers **8 user stories** across 5 screens. Everything runs on fic
 
 | Content | Where | Source / owner |
 |---|---|---|
-| 8 fictional trucks (5 electric across 2 brands, 3 diesel) | A1 | `seedData.ts` |
+| 7 fictional trucks (5 electric across 2 brands, 2 diesel) | A1 | `seedData.ts` |
 | 6–12 fictional jobs for one working day | A2, A3 | `seedData.ts` |
 | Depot and public chargers with power and price | A4 | `seedData.ts`; prices from E-22 |
 | Explanation sentences (feasible, infeasible, overridden) | A3 | Text templates in `planner.ts` |

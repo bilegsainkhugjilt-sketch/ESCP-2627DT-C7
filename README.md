@@ -47,7 +47,7 @@ The app keeps your plan in the browser (`localStorage`). **Reset demo** (top rig
 
 ## Demo script (about 3 minutes)
 
-1. **Fleet:** 8 fictional trucks (5 electric from 2 brands, 3 diesel) with battery level, the 15% safety reserve and approximate range.
+1. **Fleet:** the night depot in 3D with 7 fictional trucks (5 electric from 2 brands, 2 diesel). Click a truck, or its button under the yard, to see its battery, range, today's jobs, charging and this week.
 2. **Jobs:** 8 fictional jobs, longest first or earliest first. Click **Generate plan**.
 3. **Daily plan, the dispatch board:** one lane per truck. VoltLane proposes **7 of 8 jobs on electric trucks**. Proposed jobs are *hatched* (pencilled in); on each electric lane a line shows the battery through the day against the dashed reserve. Click a job on the board to jump to its explanation, e.g. *"E-03 can do this: needs 182 kWh, has 236 kWh above the 15% reserve, so it arrives with 28% left."* The 330 km job J-07 goes to a diesel, with the reason.
 4. **Approve** J-01 and J-04: their blocks turn solid ("inked") and move to *Approved*.
@@ -74,6 +74,10 @@ src/
 Requirement IDs from `product.md` (US-xx, FR-xx, NFR-xx) are referenced in code comments and commit messages.
 
 ---
+
+## 3D models and credits
+
+The A1 fleet page shows the depot in 3D with [three.js](https://threejs.org) via React Three Fiber. The truck models are from the **Kenney Car Kit** by Kenney (www.kenney.nl), licensed **CC0** (public domain); the licence file is in `public/models/`. They are bundled with the app, so the 3D view also makes no network calls. If a browser has WebGL switched off, A1 falls back to the truck buttons, the detail panel and the table.
 
 ## Assumptions in the rules engine
 

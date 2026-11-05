@@ -13,10 +13,10 @@ export function Navigation({ current, onNavigate }: { current: PageId; onNavigat
   return (
     <nav className="sidebar" aria-label="Main">
       <div className="brand">
-        <div className="wordmark">VoltLane</div>
+        <div className="wordmark">Volt<span>Lane</span></div>
         {/* lane marking: solid edge line + dashed centre line, the dashes in charge lime */}
         <svg width="112" height="8" viewBox="0 0 112 8" aria-hidden="true">
-          <rect x="0" y="0" width="112" height="1.5" fill="var(--color-text-inverse-muted)" />
+          <rect x="0" y="0" width="112" height="1.5" fill="var(--color-text-muted)" />
           {[0, 1, 2, 3, 4, 5].map((i) => <rect key={i} x={i * 20} y="5" width="12" height="3" fill="var(--color-charge)" />)}
         </svg>
       </div>

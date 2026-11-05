@@ -180,7 +180,7 @@ No language model runs inside the app. AI coding tools are used to build the pro
 - Semantic labels, keyboard-operable controls and legible contrast (WCAG AA).
 
 ## 11. Demo plan and verification
-1. A1: open the fleet overview with 8 sample trucks (5 electric across 2 brands, 3 diesel).
+1. A1: open the 3D fleet overview with 7 sample trucks (5 electric across 2 brands, 2 diesel) and click a truck to open its panel.
 2. A3: generate a plan for 6 sample jobs; show that e-trucks are chosen only when feasible.
 3. A3: show why one job was not given to an e-truck (not enough range or payload).
 4. A3: manually override one proposal; the app warns if the override is not feasible.

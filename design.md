@@ -2,34 +2,35 @@
 
 **Course:** ESCP Business School, Bachelor in Management: Digital Transformation (Dr. David M. Lehmann), Berlin campus
 **Team:** Bilegsain Khugjilt · Noélie Girardot Chaffard · Minghongyu (Echo) Li · Angilbert · Yasha · Zack
-**Version:** v3, 5 Nov 2026: "dispatch board" redesign (palette, type and layout taken from the trucking world; contrast recalculated)
+**Version:** v4, 5 Nov 2026: "night depot" (black + neon lime, 3D depot yard on A1; contrast recalculated). v3 introduced the dispatch board, which stays.
 
 > Design system for the VoltLane prototype: principles, tokens, components and the Storybook plan. This is Garrett's layer 5 (Surface); layers 1–4 are in `product.md`.
 >
-> **Figma wireframes:** [VoltLane — Skeleton wireframes](https://www.figma.com/design/rUYDqDUAa8etl3w6t6hFu9). The wireframes show the v1 layout; the shipped app follows this v3 document.
+> **Figma wireframes:** [VoltLane — Skeleton wireframes](https://www.figma.com/design/rUYDqDUAa8etl3w6t6hFu9). The wireframes show the v1 layout; the shipped app follows this v4 document.
 
 ---
 
 ## 1. Design direction
 
-v1 used a generic dashboard look (black sidebar, one acid accent, identical rounded cards, "A · B · C" text strings). It looked machine-made, not specific to dispatching. v3 takes its visual language from **where dispatchers actually work**:
+v1 used a generic dashboard look. v3 took its layout from where dispatchers work (the dispatch board, pencil vs ink). v4 keeps that layout and changes the surface to **the depot at night**: dispatchers plan tomorrow while the trucks stand charging in the yard, so the app is black, and electricity is the only thing that glows.
 
 | Idea | Where it comes from | What it does on screen |
 |---|---|---|
-| **The dispatch board** | Paper and magnetic planning boards in dispatch offices, and Gantt views in transport software | A3 shows one lane per truck with jobs at their real time windows, so you see the whole day at once |
-| **Pencil vs ink** | Dispatchers pencil in a plan and ink it when it is confirmed | Proposed jobs are **hatched**; approved jobs are **solid** (NFR-05) |
-| **Battery line** | A fuel or charge gauge, drawn over time | On every electric lane a line traces the battery through the day against the dashed 15% reserve. It shows VoltLane's core idea, using the battery without crossing the reserve (KI-01), in one picture |
+| **The night depot (A1)** | The yard at the end of a shift: trucks in their bays, chargers lit | A1 opens on a 3D yard with the 7 trucks. Electric trucks are outlined in neon lime next to a lit charger; diesels are grey. Click a truck (or its button below the yard) to fly the camera to it and open its panel: battery, range, today's jobs, charging, this week |
+| **The dispatch board (A3)** | Paper and magnetic planning boards, and Gantt views in transport software | One lane per truck with jobs at their real time windows |
+| **Pencil vs ink** | Dispatchers pencil in a plan and ink it when it is confirmed | Proposed jobs are **hatched / dashed**; approved jobs are **solid neon** (NFR-05) |
+| **Battery line** | A charge gauge drawn over time | On every electric lane a neon line traces the battery through the day against the dashed 15% reserve (KI-01) |
+| **Only electricity glows** | Charger LEDs and lit cables in a dark yard | Neon lime and its glow are reserved for electric trucks, charge and the primary action. Nothing else glows |
 | **Road-sign type** | Barlow is drawn after highway signage | Clear, slightly condensed letterforms for dense data |
-| **Road palette** | Asphalt, traffic-sign blue, signal amber | Colours carry meaning: blue = act, lime = electric/charge, amber = needs attention |
 
 ## 2. Design principles
 
 | Principle | What it means on screen | Traces to |
 |---|---|---|
 | **Explain, don't hide** | Every proposal has one plain sentence and an energy bar: what the job needs vs what the truck has above its reserve | UN-03, KI-03, FR-09 |
-| **Pencil until approved** | Hatched = proposed, solid = approved, blue outline = changed by the dispatcher | NFR-05, NFR-07 |
+| **Pencil until approved** | Hatched or dashed = proposed, solid neon = approved, amber tag = changed by the dispatcher | NFR-05, NFR-07 |
 | **Safe by default** | A choice below the safety reserve needs explicit confirmation and stays flagged | FR-13 |
-| **Colour means something** | Lime only for electric/charge, blue only for actions and selection, amber only for warnings, red only for "not electric / below reserve" | NFR-02 |
+| **Colour means something** | Neon lime only for electric/charge and the one primary action, amber only for warnings, red only for "not electric / below reserve", grey for diesel | NFR-02 |
 | **Plain words** | Sentences instead of "·"-joined labels; buttons say what they do ("Approve all 8", "Generate plan") | NFR-04 |
 | **Never colour alone** | Every status has a text label; hatching vs solid also works without colour | NFR-02, NFR-11 |
 
@@ -39,38 +40,36 @@ v1 used a generic dashboard look (black sidebar, one acid accent, identical roun
 
 ### 3.1 Colour
 
+All colours live in `src/styles/tokens.css`. The 3D scene reads the same tokens at runtime (`getComputedStyle`), so it has no colours of its own.
+
 | Token | Value | Use |
 |---|---|---|
-| `--color-bg` | `#EDEFF1` | App background (depot concrete) |
-| `--color-surface` | `#FFFFFF` | Board, tables, panels |
-| `--color-surface-subtle` | `#F4F5F6` | Table headers, empty bar tracks |
-| `--color-surface-inverse` | `#1D2229` | Asphalt: sidebar, approved diesel jobs, "needed" part of energy bars |
-| `--color-text` / `--color-text-muted` | `#1D2229` / `#59616B` | Main and secondary text |
-| `--color-text-inverse` / `--color-text-inverse-muted` | `#FFFFFF` / `#AEB6BF` | Text on asphalt |
-| `--color-border` / `--color-border-strong` / `--color-border-inverse` | `#DADDE1` / `#6B737D` / `#4A525C` | Dividers / control and block outlines / lines on dark |
-| `--color-action` / `--color-action-hover` / `--color-action-tint` | `#0E4C92` / `#0B3E78` / `#E6EEF8` | Traffic-sign blue: primary buttons, selection, pressed toggles, focus |
-| `--color-charge` / `--color-charge-hover` | `#D4EE3F` / `#C6E12F` | Lime: electric trucks, charge, approved e-jobs. **Background only, never text or a border on white** |
-| `--color-success` / `-bg` | `#17733A` / `#E3F2E7` | Available |
-| `--color-warning` / `-bg` | `#8A5300` / `#FFF0CC` | Signal amber: low battery, late charging, replaced jobs |
-| `--color-danger` / `-bg` | `#B3261E` / `#FBE9E7` | Below reserve, no truck; the dashed reserve line |
-| `--color-focus` | `#0E4C92` | Focus ring on light surfaces; on the sidebar the ring uses `--color-charge` |
-| `--color-overlay` / `--color-hover-inverse` | asphalt 50% / white 7% | Dialog backdrop / sidebar hover |
+| `--color-bg` | `#050505` | App background, the 3D yard, sidebar |
+| `--color-surface` | `#0D0E0F` | Board, tables, panels |
+| `--color-surface-subtle` | `#16181A` | Table headers, empty tracks, proposed job cards |
+| `--color-surface-raised` | `#24272B` | Truck bodies in 3D, approved diesel jobs, gauge tracks |
+| `--color-text` / `--color-text-muted` | `#F1F3F4` / `#8E959C` | Main and secondary text |
+| `--color-text-inverse` | `#050505` | Text on neon |
+| `--color-border` / `--color-border-strong` | `#1F2225` / `#6E747C` | Dividers / control outlines, diesel outlines in 3D |
+| `--color-charge` (= `--color-action`, `--color-focus`) | `#C8FF00` | Neon lime: electric, charge, primary button, selection, focus ring |
+| `--color-charge-glow` | lime at 35% | The glow behind neon elements (box-shadow, bloom) |
+| `--color-action-tint` | `#1A2200` | Selected rows, pressed toggles, approved job cards |
+| `--color-success` / `-bg` | `#4ADE80` / `#0B2414` | Available |
+| `--color-warning` / `-bg` | `#FFB547` / `#2A1F06` | Low battery, late charging, changed by you |
+| `--color-danger` / `-bg` | `#FF6B5E` / `#2A0E0C` | Below reserve, no truck; the dashed reserve line |
 
 ### 3.2 Contrast check (WCAG 2.1, calculated)
 
 | Pair | Ratio | Required | Result |
 |---|---|---|---|
-| Text on white / on app background / on subtle | 16.0 / 13.9 / 14.7 : 1 | 4.5 | ✅ |
-| Muted text on white / on app background | 6.3 / 5.4 : 1 | 4.5 | ✅ |
-| White on asphalt / muted inverse on asphalt | 16.0 / 7.8 : 1 | 4.5 | ✅ |
-| White on traffic blue (primary button) | 8.5 : 1 | 4.5 | ✅ |
-| Blue on blue tint (pressed toggle, "Changed by you") | 7.3 : 1 | 4.5 | ✅ |
-| Text on lime / lime on asphalt ("CHARGE" marker) | 12.3 / 12.3 : 1 | 4.5 | ✅ |
-| Amber on amber background / green on green / red on red | 5.6 / 5.1 / 5.6 : 1 | 4.5 | ✅ |
-| Focus blue on app background / lime focus on sidebar | 7.4 / 12.3 : 1 | 3 (non-text) | ✅ |
-| Strong border on white (controls, job blocks) | 4.8 : 1 | 3 (non-text) | ✅ |
-| ❌ Lime on white as text or border | 1.3 : 1 | 3 | **Not allowed**; lime is always a fill with a dark outline or dark text |
-| ❌ Blue focus ring on asphalt | 1.9 : 1 | 3 | **Not used**; the sidebar uses a lime focus ring |
+| Text on background / on surface / on raised | 18.6 / 17.4 / 12.3 : 1 | 4.5 | ✅ |
+| Muted text on surface | 6.4 : 1 | 4.5 | ✅ |
+| Neon lime on surface (text, outlines, focus ring) | 16.3 : 1 | 4.5 | ✅ |
+| Black text on neon lime (primary button, approved blocks) | 17.2 : 1 | 4.5 | ✅ |
+| Lime on lime tint (pressed toggle, selected) | 14.0 : 1 | 4.5 | ✅ |
+| Amber on amber bg / green on green bg / red on red bg | 9.2 / 9.4 / 6.4 : 1 | 4.5 | ✅ |
+| Strong border on surface (controls, job blocks) | 3.9 : 1 | 3 (non-text) | ✅ |
+| ⚠️ Default border on surface | 1.2 : 1 | – | Dividers only, never the only edge of a control |
 
 ### 3.3 Typography
 
@@ -109,6 +108,8 @@ Hatching: `--hatch-charge` (lime/white, 135°) for proposed electric jobs and ch
 | **RangeBar** | Battery now and approximate range | Normal, low | `role="meter"` with min/max/now; caption as text | A1 |
 | **Charging timeline** | Depot and break charging per truck | Depot, public in break, late | Full table of the same sessions below it | A4 |
 | **Report statement + figures** | One sentence with the key share, three supporting figures, battery use per truck | Normal, under-used | Plain text; bars have `role="meter"` | A5 |
+| **DepotYard3D** | 3D night depot with the 7 trucks (Kenney Car Kit models, CC0, loaded from `/public/models`, no network) | Overview, truck selected (camera flies in, wheels turn, bay ring pulses), WebGL off (text fallback) | The canvas is a picture; every truck is also a real button in the truck picker below it, and all numbers are in the panel and table. Reduced motion: no camera flight or spinning | A1 |
+| **TruckPanel** | Details for one truck | Electric with plan, electric without plan, diesel, charge ends after shift | Section with heading; battery dial has `role="img"` and a text label; live region announces the change | A1 |
 | **Navigation** | Sidebar with a lane-marking wordmark | Default, active (lime edge) | `<nav>`, `aria-current="page"`, lime focus ring | All |
 | **TopBar** | Depot, date, temperature, active tests, Reset demo | Default, active disruption, reset confirmation | Reset asks for confirmation | All |
 

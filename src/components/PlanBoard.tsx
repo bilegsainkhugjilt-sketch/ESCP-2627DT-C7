@@ -123,7 +123,7 @@ export function PlanBoard({ assignments, ctx, selectedJobId, onSelect }: Props) 
                   <polyline points={trace.map(([m, p]) => `${x(m)},${100 - Math.max(0, Math.min(100, p))}`).join(' ')}
                     fill="none" stroke="var(--color-surface)" strokeWidth="5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
                   <polyline points={trace.map(([m, p]) => `${x(m)},${100 - Math.max(0, Math.min(100, p))}`).join(' ')}
-                    fill="none" stroke="var(--color-text)" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+                    fill="none" stroke="var(--color-charge)" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
                 </svg>
                 </div>
               )}

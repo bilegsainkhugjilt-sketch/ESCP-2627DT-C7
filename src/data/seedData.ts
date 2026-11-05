@@ -13,7 +13,6 @@ export const trucks: Truck[] = [
   { id: 'E-05', name: 'E-05', brand: 'Brand A', powertrain: 'electric', weightClass: 'heavy', batteryKWh: 443, socPercent: 56, reservePercent: 15, efficiencyKWhPerKm: 1.1, capacityKg: 24000, status: 'available', driverId: 'DR-5' },
   { id: 'D-01', name: 'D-01', brand: 'Brand A', powertrain: 'diesel', weightClass: 'heavy', capacityKg: 25000, status: 'available', driverId: 'DR-6' },
   { id: 'D-02', name: 'D-02', brand: 'Brand B', powertrain: 'diesel', weightClass: 'heavy', capacityKg: 25000, status: 'available', driverId: 'DR-7' },
-  { id: 'D-03', name: 'D-03', brand: 'Brand A', powertrain: 'diesel', weightClass: 'medium', capacityKg: 5500, status: 'maintenance', driverId: 'DR-8' },
 ];
 
 export const jobs: Job[] = [
@@ -35,7 +34,6 @@ export const drivers: Driver[] = [
   { id: 'DR-5', name: 'Driver 5', shiftStart: '05:30', shiftEnd: '17:00' },
   { id: 'DR-6', name: 'Driver 6', shiftStart: '05:30', shiftEnd: '17:00' },
   { id: 'DR-7', name: 'Driver 7', shiftStart: '05:30', shiftEnd: '17:00' },
-  { id: 'DR-8', name: 'Driver 8', shiftStart: '06:00', shiftEnd: '17:30' },
 ];
 
 export const chargers: Charger[] = [

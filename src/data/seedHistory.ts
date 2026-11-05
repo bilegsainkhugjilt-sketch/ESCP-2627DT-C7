@@ -12,7 +12,6 @@ export const history: HistoryDay[] = [
       { truckId: 'E-05', km: 150, tollKm: 110, possibleKm: 230 },
       { truckId: 'D-01', km: 320, tollKm: 290 },
       { truckId: 'D-02', km: 260, tollKm: 220 },
-      { truckId: 'D-03', km: 140, tollKm: 70 },
     ],
   },
   {
@@ -25,7 +24,6 @@ export const history: HistoryDay[] = [
       { truckId: 'E-05', km: 120, tollKm: 80, possibleKm: 225 },
       { truckId: 'D-01', km: 340, tollKm: 300 },
       { truckId: 'D-02', km: 290, tollKm: 250 },
-      { truckId: 'D-03', km: 0, tollKm: 0 },
     ],
   },
   {
@@ -38,7 +36,6 @@ export const history: HistoryDay[] = [
       { truckId: 'E-05', km: 160, tollKm: 120, possibleKm: 230 },
       { truckId: 'D-01', km: 300, tollKm: 270 },
       { truckId: 'D-02', km: 310, tollKm: 280 },
-      { truckId: 'D-03', km: 0, tollKm: 0 },
     ],
   },
 ];

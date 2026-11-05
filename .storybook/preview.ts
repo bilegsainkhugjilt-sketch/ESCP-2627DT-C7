@@ -11,7 +11,7 @@ import '../src/styles/app.css';
 const preview: Preview = {
   parameters: {
     layout: 'padded',
-    backgrounds: { options: { app: { name: 'App background', value: '#EDEFF1' } } },
+    backgrounds: { options: { app: { name: 'App background', value: '#050505' } } },
     a11y: { test: 'error' },
   },
   initialGlobals: { backgrounds: { value: 'app' } },
