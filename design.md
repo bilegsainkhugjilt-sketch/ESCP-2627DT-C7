@@ -42,6 +42,10 @@
 | `--color-warning` / `--color-warning-bg` | `#8A5A00` / `#FCF2D9` | Low reserve, charging needed, needs attention |
 | `--color-danger` / `--color-danger-bg` | `#B3261E` / `#FAEBE8` | Infeasible, not electric, error |
 | `--color-focus` | `#2457D6` | Keyboard focus ring on light surfaces (on dark surfaces use `--color-accent`) |
+| `--color-text-inverse-muted` | `#C9C9C2` | Secondary text on dark surfaces (11.1 : 1 on `#141414`) |
+| `--color-accent-hover` / `--color-hover-inverse` | `#D6E62E` / white 8% | Hover states for lime buttons / sidebar items |
+| `--color-border-inverse` | `#8E8E87` | Button outlines on dark cards |
+| `--color-overlay` | `#141414` at 45% | Background behind dialogs |
 
 ### 2.2 Contrast check (WCAG 2.1, calculated)
 
@@ -106,6 +110,11 @@ Numbers in tables use tabular figures (`font-variant-numeric: tabular-nums`) so 
   --color-danger: #B3261E;
   --color-danger-bg: #FAEBE8;
   --color-focus: #2457D6;
+  --color-text-inverse-muted: #C9C9C2;
+  --color-accent-hover: #D6E62E;
+  --color-border-inverse: #8E8E87;
+  --color-hover-inverse: rgba(255, 255, 255, 0.08);
+  --color-overlay: rgba(20, 20, 20, 0.45);
 
   /* type */
   --font-family: "Inter", system-ui, sans-serif;
