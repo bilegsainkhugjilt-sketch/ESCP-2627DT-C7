@@ -174,9 +174,13 @@ function TagProjector({ trucks, tags }: { trucks: Truck[]; tags: RefObject<(HTML
 const HOME_TARGET = new THREE.Vector3(0, 0.9, -1.6);
 const HOME_CAM = new THREE.Vector3(0, 3.1, 14.2);
 
-function CameraRig({ focus }: { focus: [number, number, number] | null }) {
-  const { camera, controls } = useThree();
+// Camera: flies to the selected truck; a swipe (trackpad) or scroll (mouse wheel) slides
+// sideways along the row of bays; pinch (or Ctrl + scroll) zooms. Drag still orbits.
+function CameraRig({ focus, count }: { focus: [number, number, number] | null; count: number }) {
+  const { camera, controls, gl } = useThree();
   const flying = useRef(true);
+  const panGoal = useRef(0);
+  const maxPan = ((count - 1) / 2) * SPACING;
   const goal = useMemo(() => {
     if (!focus) return { target: HOME_TARGET, cam: HOME_CAM };
     const t = new THREE.Vector3(focus[0], 0.9, focus[2]);
@@ -187,19 +191,52 @@ function CameraRig({ focus }: { focus: [number, number, number] | null }) {
   useEffect(() => {
     const c = controls as unknown as OrbitControlsImpl | null;
     if (!c) return;
-    const stop = () => { flying.current = false; };
+    const stop = () => { flying.current = false; panGoal.current = c.target.x; };
     c.addEventListener('start', stop);
     return () => c.removeEventListener('start', stop);
   }, [controls]);
 
+  useEffect(() => {
+    const el = gl.domElement;
+    const onWheel = (e: WheelEvent) => {
+      const c = controls as unknown as OrbitControlsImpl | null;
+      if (!c) return;
+      e.preventDefault();
+      if (flying.current) { flying.current = false; panGoal.current = c.target.x; }
+      if (e.ctrlKey) {
+        // pinch on a trackpad arrives as Ctrl + wheel: zoom towards the target
+        const offset = camera.position.clone().sub(c.target);
+        const len = THREE.MathUtils.clamp(offset.length() * (1 + e.deltaY * 0.01), 5, 26);
+        camera.position.copy(c.target).add(offset.setLength(len));
+        c.update();
+        return;
+      }
+      const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      const unit = e.deltaMode === 1 ? 0.4 : 0.012; // lines (some mice) vs pixels
+      panGoal.current = THREE.MathUtils.clamp(panGoal.current + delta * unit, -maxPan, maxPan);
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [gl, controls, camera, maxPan]);
+
   useFrame(() => {
     const c = controls as unknown as OrbitControlsImpl | null;
-    if (!c || !flying.current) return;
-    const k = reducedMotion ? 1 : 0.06;
-    camera.position.lerp(goal.cam, k);
-    c.target.lerp(goal.target, k);
-    c.update();
-    if (camera.position.distanceTo(goal.cam) < 0.01) flying.current = false;
+    if (!c) return;
+    if (flying.current) {
+      const k = reducedMotion ? 1 : 0.06;
+      camera.position.lerp(goal.cam, k);
+      c.target.lerp(goal.target, k);
+      c.update();
+      panGoal.current = c.target.x;
+      if (camera.position.distanceTo(goal.cam) < 0.01) flying.current = false;
+      return;
+    }
+    const dx = (panGoal.current - c.target.x) * (reducedMotion ? 1 : 0.15);
+    if (Math.abs(dx) > 0.0005) {
+      c.target.x += dx;
+      camera.position.x += dx;
+      c.update();
+    }
   });
   return null;
 }
@@ -269,13 +306,14 @@ export default function DepotYard3D({ trucks, selectedId, onSelect }: {
       <OrbitControls
         makeDefault
         enablePan={false}
+        enableZoom={false}
         minDistance={5}
         maxDistance={26}
         minPolarAngle={0.35}
         maxPolarAngle={1.38}
         enableDamping
       />
-      <CameraRig focus={focus} />
+      <CameraRig focus={focus} count={trucks.length} />
       <EffectComposer multisampling={4}>
         <Bloom mipmapBlur intensity={1.1} luminanceThreshold={0.55} luminanceSmoothing={0.2} />
         <Vignette eskil={false} offset={0.25} darkness={0.75} />

@@ -45,7 +45,7 @@ export function FleetOverview({ ctx, assignments }: { ctx: PlanContext; assignme
               <DepotYard3D trucks={ctx.trucks} selectedId={selectedId} onSelect={setSelectedId} />
             </Suspense>
           </YardBoundary>
-          <p className="yard-hint" aria-hidden="true">Drag to look around. Scroll to zoom.</p>
+          <p className="yard-hint" aria-hidden="true">Swipe or scroll to slide along the trucks. Drag to look around. Pinch to zoom.</p>
         </div>
         <aside className="yard-side" aria-live="polite">
           {selected ? (
