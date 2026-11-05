@@ -113,18 +113,6 @@ Electric trucks in Europe go 11–19% further than their makers state (E-10), ye
 
 ---
 
-## 2. Scope
-*To be completed in the 11:00–12:15 block.* Turn each UN into user stories → functional requirements → non-functional requirements → screens (workshop slide 12 format).
-
-| # | User story | Functional requirements | Non-functional requirements | Screens |
-|---|---|---|---|---|
-| US-01 | As a dispatcher, I want to see each e-truck's predicted range with a safety buffer, so I know which jobs it can safely do. *(UN-01)* | FR-01 … | NFR-01 … | A1 |
-| US-02 | … *(UN-02)* | | | A3 |
-
-## 3. Structure
-*To be completed in the 11:00–12:15 block.*
-- 3.1 Interaction design: user flow (daily planning; re-plan when a delivery runs late)
-- 3.2 Information architecture: data model (Truck, Job, Assignment, ChargingStation, ChargingSlot, Driver)
 
 ## 4. Skeleton
 *To be completed in the 12:30–13:15 block.*
