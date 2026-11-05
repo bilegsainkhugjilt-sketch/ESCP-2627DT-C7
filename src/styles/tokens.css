@@ -1,51 +1,66 @@
-/* Design tokens — copied from design.md §2.5. Do not hard-code colours elsewhere. */
+/* Design tokens — design.md §2 (v3, "dispatch board"). Do not hard-code colours elsewhere.
+   Palette taken from the road: asphalt, traffic-sign blue, charge lime, signal amber. */
 :root {
-  /* colour */
-  --color-bg: #F2F2ED;
-  --color-surface: #FFFFFF;
-  --color-surface-subtle: #E8E8E3;
-  --color-surface-inverse: #141414;
-  --color-text: #141414;
-  --color-text-muted: #5C5C57;
+  /* colour — base */
+  --color-bg: #EDEFF1;              /* depot concrete: app background */
+  --color-surface: #FFFFFF;         /* boards, tables, panels */
+  --color-surface-subtle: #F4F5F6;  /* table headers, empty track */
+  --color-surface-inverse: #1D2229; /* asphalt: sidebar, inked (approved) diesel */
+  --color-text: #1D2229;
+  --color-text-muted: #59616B;
   --color-text-inverse: #FFFFFF;
-  --color-accent: #E3F33B;
-  --color-border: #D9D9D2;
-  --color-border-strong: #5C5C57;
-  --color-success: #17733A;
-  --color-success-bg: #E6F5E8;
-  --color-warning: #8A5A00;
-  --color-warning-bg: #FCF2D9;
-  --color-danger: #B3261E;
-  --color-danger-bg: #FAEBE8;
-  --color-focus: #2457D6;
-  --color-text-inverse-muted: #C9C9C2;
-  --color-accent-hover: #D6E62E;
-  --color-border-inverse: #8E8E87;
-  --color-hover-inverse: rgba(255, 255, 255, 0.08);
-  --color-overlay: rgba(20, 20, 20, 0.45);
+  --color-text-inverse-muted: #AEB6BF;
+  --color-border: #DADDE1;
+  --color-border-strong: #6B737D;
+  --color-border-inverse: #4A525C;
 
-  /* type */
-  --font-family: "Inter", system-ui, sans-serif;
+  /* colour — meaning */
+  --color-action: #0E4C92;          /* traffic-sign blue: buttons, selection, focus */
+  --color-action-hover: #0B3E78;
+  --color-action-tint: #E6EEF8;
+  --color-charge: #D4EE3F;          /* lime = electric / charge. Background only, never text on white */
+  --color-charge-hover: #C6E12F;
+  --color-success: #17733A;
+  --color-success-bg: #E3F2E7;
+  --color-warning: #8A5300;         /* signal amber */
+  --color-warning-bg: #FFF0CC;
+  --color-danger: #B3261E;
+  --color-danger-bg: #FBE9E7;
+  --color-focus: #0E4C92;           /* on dark surfaces use --color-charge */
+  --color-overlay: rgba(29, 34, 41, 0.5);
+  --color-hover-inverse: rgba(255, 255, 255, 0.07);
+
+  /* kept for compatibility with earlier components */
+  --color-accent: var(--color-charge);
+  --color-accent-hover: var(--color-charge-hover);
+
+  /* type — Barlow: a family drawn from highway signage */
+  --font-family: "Barlow", system-ui, sans-serif;
+  --font-family-condensed: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-md: 16px;
   --font-size-lg: 20px;
-  --font-size-xl: 28px;
-  --font-size-kpi: 40px;
+  --font-size-xl: 30px;
+  --font-size-kpi: 44px;
   --font-weight-regular: 400;
+  --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* space & shape */
+  /* space & shape — radius grows with the size of the object */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
   --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
-  --radius-sm: 6px; --radius-md: 12px; --radius-lg: 20px; --radius-pill: 999px;
-  --shadow-card: 0 1px 2px rgba(20, 20, 20, 0.06);
+  --radius-sm: 3px; --radius-md: 6px; --radius-lg: 10px; --radius-pill: 999px;
 
   /* layout */
-  --sidebar-width: 232px;
+  --sidebar-width: 216px;
   --content-min-width: 1280px;
 }
 
 :focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
-.on-dark :focus-visible { outline-color: var(--color-accent); }
+.on-dark :focus-visible, .sidebar :focus-visible { outline-color: var(--color-charge); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

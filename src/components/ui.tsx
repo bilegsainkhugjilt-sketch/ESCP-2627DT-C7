@@ -9,7 +9,7 @@ export function Button({ variant = 'secondary', className = '', ...rest }: Butto
   return <button type="button" className={`btn ${v} ${className}`.trim()} {...rest} />;
 }
 
-export type BadgeTone = 'neutral' | 'accent' | 'dark' | 'success' | 'warning' | 'danger';
+export type BadgeTone = 'neutral' | 'accent' | 'dark' | 'success' | 'warning' | 'danger' | 'action';
 
 /** Status always as text, never colour alone (NFR-02). */
 export function StatusBadge({ tone = 'neutral', children }: { tone?: BadgeTone; children: ReactNode }) {
@@ -37,7 +37,7 @@ export function RangeBar({ socPercent, reservePercent, rangeKm, low }: { socPerc
         <div className="range-reserve" style={{ left: `${reservePercent}%` }} title={`${reservePercent}% safety reserve`} />
       </div>
       <span className={`range-text ${low ? 'low' : ''}`}>
-        {socPercent}% · ~{Math.round(rangeKm)} km predicted (estimate){low ? ' · low' : ''}
+        {socPercent}% now, about {Math.round(rangeKm)} km{low ? ' (low)' : ''}
       </span>
     </div>
   );

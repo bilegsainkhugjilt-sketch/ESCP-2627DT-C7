@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Navigation } from './Navigation';
 
 const colours: [string, string][] = [
-  ['--color-bg', 'Page background'], ['--color-surface', 'Cards, tables'], ['--color-surface-subtle', 'Table headers'],
-  ['--color-surface-inverse', 'Sidebar, approved'], ['--color-text', 'Main text'], ['--color-text-muted', 'Secondary text (6.0 : 1)'],
-  ['--color-accent', 'Lime accent — background only'], ['--color-success', 'Feasible (5.9 : 1)'], ['--color-warning', 'Needs attention (5.9 : 1)'],
-  ['--color-danger', 'Not electric (6.5 : 1)'], ['--color-focus', 'Focus ring (5.5 : 1)'],
+  ['--color-bg', 'App background'], ['--color-surface', 'Board, tables'], ['--color-surface-subtle', 'Table headers'],
+  ['--color-surface-inverse', 'Asphalt: sidebar, approved diesel'], ['--color-text', 'Text (16 : 1)'], ['--color-text-muted', 'Secondary text (6.3 : 1)'],
+  ['--color-action', 'Traffic blue: actions, selection'], ['--color-charge', 'Lime: electric, charge (fill only)'], ['--color-warning', 'Signal amber (6.3 : 1)'],
+  ['--color-danger', 'Below reserve, no truck'], ['--color-success', 'Available'], ['--color-action-tint', 'Selected, pressed'],
 ];
 
 const meta: Meta = { title: 'Foundations/Tokens' };
@@ -30,12 +30,12 @@ export const Colours: Story = {
 export const TypeScale: Story = {
   render: () => (
     <div style={{ display: 'grid', gap: 8 }}>
-      <span style={{ fontSize: 'var(--font-size-kpi)', fontWeight: 700 }}>40 · KPI number</span>
-      <span style={{ fontSize: 'var(--font-size-xl)', fontWeight: 700 }}>28 · Page title</span>
-      <span style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>20 · Section title</span>
-      <span style={{ fontSize: 'var(--font-size-md)' }}>16 · Body</span>
-      <span style={{ fontSize: 'var(--font-size-sm)' }}>14 · Tables and cards</span>
-      <span style={{ fontSize: 'var(--font-size-xs)' }}>12 · Badges and footnotes</span>
+      <span style={{ fontFamily: 'var(--font-family-condensed)', fontSize: 'var(--font-size-kpi)', fontWeight: 600 }}>44, report statement</span>
+      <span style={{ fontFamily: 'var(--font-family-condensed)', fontSize: 'var(--font-size-xl)', fontWeight: 600 }}>30, page title</span>
+      <span style={{ fontFamily: 'var(--font-family-condensed)', fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>20, section title</span>
+      <span style={{ fontSize: 'var(--font-size-md)' }}>16, body</span>
+      <span style={{ fontSize: 'var(--font-size-sm)' }}>14, tables and rows</span>
+      <span style={{ fontSize: 'var(--font-size-xs)' }}>12, tags and notes</span>
     </div>
   ),
 };
