@@ -1,8 +1,7 @@
 # architecture.md — VoltLane
 
 **Course:** ESCP Business School, Bachelor in Management: Digital Transformation (Dr. David M. Lehmann), Berlin campus
-**Team:** Bilegsain Khugjilt · Noélie Girardot Chaffard · Minghongyu (Echo) Li · Angilbert · Yasha · Zack
-**Version:** v2, 5 Nov 2026
+**Team:** Bilegsain Khugjilt · Noélie Girardot Chaffard · Minghongyu (Echo) Li · Angilbert · Yasha Berliner · Zack Stanton
 
 > Technical architecture for the VoltLane prototype. All records are fictional. No external APIs and no real data, as required by the workshop. Requirement IDs (`UN-xx`, screens `A1–A5`) refer to `product.md`; evidence IDs (`E-xx`) refer to `evidence.md`.
 
@@ -43,9 +42,10 @@ App state: trucks, jobs, chargers, drivers, assignments (proposed | approved | o
         |
         +--> Charging planner: depot first; public charging only inside a 45-min driver break
         |
-        +--> Scenario engine: delay / charger outage / cold weather -> draft revised plan
+        +--> Scenario engine: late order / delay / charger outage / cold weather -> draft revised plan
         |
-        +--> KPI calculator: approved e-km, e-km share, toll and energy savings (sourced constants)
+        +--> KPI calculator: approved e-km, e-km share, e-km per truck, acceptance rate,
+        |                    toll and energy savings (sourced constants)
         |
         v
 Local seed data (fictional) + one week of fictional history for the report; no network calls
@@ -102,12 +102,14 @@ voltlane/
 
 | Entity | Key fields |
 |---|---|
-| Truck | id, name, **brand** (mixed brands is our differentiator), powertrain (`electric` / `diesel`), weightClass (`7.5-12t` / `>18t`), batteryKWh, socPercent, reservePercent, efficiencyKWhPerKm, capacityKg, status, depotId |
+| Truck | id, name, **brand** (mixed brands is our differentiator), powertrain (`electric` / `diesel`), weightClass (`7.5-12t` / `12-18t` / `>18t`), batteryKWh, socPercent, reservePercent, efficiencyKWhPerKm, capacityKg, status, depotId |
 | Job | id, customer (fictional), distanceKm, tollRoadKm, payloadKg, stops, windowStart, windowEnd |
 | Charger | id, kind (`depot` / `public`), powerKw, pricePerKWh, available |
-| Driver | id, name (fictional), shiftStart, shiftEnd, breakDueAfterMin (270 = 4.5 h) |
-| Assignment | jobId, truckId, driverId, status (`proposed` / `approved` / `overridden`), explanation, reserveAfterPercent, chargingStop? |
-| Scenario | temperatureC, weatherFactor, events (delay, charger outage) |
+| Driver | id, name (fictional), shiftStart, shiftEnd, drivenMinToday, breakDueAfterMin (270 = 4.5 h) |
+| Assignment | jobId, truckId, driverId, status (`proposed` / `approved` / `overridden`), explanation, reserveAfterPercent, **confidence** (`high` / `medium` / `low`), chargingStop?, overrideReason? |
+| Scenario | temperatureC, weatherFactor, events (late order, delay, charger outage) |
+
+**Confidence (UN-01):** derived from the battery left on arrival **above the safety reserve**: `high` if > 25 points, `medium` if 10–25 points, `low` if under 10 points. Shown as a text badge (not colour alone) on A1 and A3.
 
 Seed values should stay realistic: heavy e-trucks use about **0.9–1.5 kWh/km** (E-10/ICCT: 92–150 kWh/100 km).
 
@@ -133,16 +135,32 @@ const requiredEnergy = job.distanceKm * truck.efficiencyKWhPerKm
 const usableEnergy = truck.batteryKWh
   * (truck.socPercent - truck.reservePercent) / 100;
 
-// Optional top-up during the legal 45-min break (Reg. 561/2006, E-21), if a charger is free
-const breakTopUp = charger?.available ? charger.powerKw * 0.75 : 0;
+// Optional top-up during the legal 45-min break (Reg. 561/2006, E-21):
+// only at a free PUBLIC charger on the route (depot charging happens before/after the shift)
+const breakTopUp = charger?.kind === 'public' && charger.available
+  ? charger.powerKw * 0.75   // kWh delivered in 45 min (0.75 h)
+  : 0;
 
 const fitsDirectly = requiredEnergy <= usableEnergy;
 const fitsWithBreakCharge = !fitsDirectly && requiredEnergy <= usableEnergy + breakTopUp;
 
+// Driver hours (Reg. 561/2006): job must end within the shift and the 9 h daily driving limit
+const driveMin = drivingMinutes(job);                         // distance ÷ average speed + stops
+const breakMin = driver.drivenMinToday + driveMin > driver.breakDueAfterMin ? 45 : 0;
+const fitsDriver = addMinutes(job.windowStart, driveMin + breakMin) <= driver.shiftEnd
+  && driver.drivenMinToday + driveMin <= 540;
+
 const feasible = truck.powertrain === 'electric'
   && truck.status === 'available'
   && job.payloadKg <= truck.capacityKg
-  && (fitsDirectly || fitsWithBreakCharge);
+  && (fitsDirectly || fitsWithBreakCharge)
+  && fitsDriver;
+
+// Confidence shown to the dispatcher (UN-01)
+const reserveAfterPercent = truck.socPercent
+  - (requiredEnergy - (fitsWithBreakCharge ? breakTopUp : 0)) / truck.batteryKWh * 100;
+const confidence = reserveAfterPercent - truck.reservePercent > 25 ? 'high'
+  : reserveAfterPercent - truck.reservePercent > 10 ? 'medium' : 'low';
 ```
 
 **Planner rule (fleet-level, KI-02):** sort jobs by distance, longest first. Give each job to the feasible e-truck that has the **smallest energy margin left above the reserve** (best fit), so short jobs don't use up e-trucks that could do long ones. Jobs no e-truck can do go to diesels. Every proposal carries an explanation, e.g. *"E-03 can do this: needs 182 kWh, has 236 kWh above the 15% reserve, so it arrives with 23% left."*
@@ -160,6 +178,16 @@ The simple calculation is not a validated range prediction. A production model w
 | Public charging | 0.49 €/kWh | E-22 |
 
 Toll savings = approved e-km on toll roads × toll rate for the truck's weight class. The report labels all savings as *estimates based on fictional data*.
+
+### Report KPIs linked to product.md §1.6
+
+| KPI on A5 | Formula | Target (product.md) |
+|---|---|---|
+| Share of fleet km driven electric | approved e-km ÷ all approved km | +20 % relative vs. baseline |
+| Electric km per e-truck per working day | approved e-km ÷ e-trucks ÷ working days | +20 % vs. baseline, zero range-related breakdowns |
+| Suggestion acceptance rate | approved without change ÷ all proposals | ≥ 70 % after 4 weeks |
+| Toll saved | see above | — |
+| Energy cost vs. diesel | e-km × kWh/km × price/kWh vs. same km in diesel | — |
 
 ## 9. Simulated agentic workflow
 **Observe:** local battery, job, charger and scenario state.
@@ -185,7 +213,8 @@ No language model runs inside the app. AI coding tools are used to build the pro
 3. A3: show why one job was not given to an e-truck (not enough range or payload).
 4. A3: manually override one proposal; the app warns if the override is not feasible.
 5. A4: trigger a mock charging-station outage; a replacement proposal appears and needs approval.
-6. A5: review the updated weekly report (e-km share, toll saved, energy cost vs. diesel).
+6. A2 → A3: add a late order; only the changed assignments are proposed again.
+7. A5: review the updated weekly report (e-km share, e-km per truck, acceptance rate, toll saved, energy cost vs. diesel).
 
 ## 12. Future production integrations (explicitly excluded)
 Truck telematics via rFMS, route and map services, real charger availability and booking, energy prices, transport management systems, login, audit logs, and predictive battery models.
