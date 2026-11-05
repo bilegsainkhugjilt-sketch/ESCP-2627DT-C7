@@ -20,11 +20,11 @@ export function Charging({ ctx, assignments }: { ctx: PlanContext; assignments: 
     <>
       <PageHead
         title="Charging schedule"
-        sub="Depot first · public charging only inside the 45-min driver break (Reg. 561/2006)"
-        actions={!publicCharger.available ? <StatusBadge tone="warning">Public charger offline</StatusBadge> : undefined}
+        sub="Trucks charge at the depot first. Public charging is only planned inside the driver's legal 45-minute break (Reg. 561/2006)."
+        actions={!publicCharger.available ? <StatusBadge tone="warning">Public charger out of service</StatusBadge> : undefined}
       />
       {assignments.length === 0 ? (
-        <div className="empty muted">Generate a plan on the Daily plan screen to see charging.</div>
+        <div className="empty"><h2>No charging planned yet</h2><p>Generate a plan on the Daily plan screen; charging follows from the jobs you approve.</p></div>
       ) : (
         <>
           <div className="timeline" role="img" aria-label="Charging timeline per electric truck; the same information is listed below as text">
@@ -75,7 +75,7 @@ export function Charging({ ctx, assignments }: { ctx: PlanContext; assignments: 
               <tbody>
                 {sessions.map((s, i) => (
                   <tr key={i}>
-                    <td><strong>{s.truckId}</strong></td>
+                    <td className="id">{s.truckId}</td>
                     <td>{s.kind === 'depot' ? 'Depot' : 'Public, in driver break'}</td>
                     <td>{s.start}–{s.end}</td>
                     <td>{Math.round(s.energyKWh)} kWh</td>

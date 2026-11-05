@@ -188,7 +188,7 @@ export function planDay(ctx: PlanContext, locked: Assignment[] = []): Assignment
     } else {
       proposals.push({
         jobId: job.id, truckId: null, driverId: null, status: 'proposed', reason: 'no-truck-free',
-        explanation: `${why} No truck is free at this time — needs manual planning.`,
+        explanation: `${why} No truck is free at this time; plan this job by hand.`,
       });
     }
   }

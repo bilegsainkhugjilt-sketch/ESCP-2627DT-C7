@@ -1,8 +1,9 @@
 // Fictional seed data for one working day (product.md §2.2). No real companies, people or data.
 import type { Charger, Driver, Job, Scenario, Truck } from '../types/domain';
 
-export const TODAY = 'Thu 5 Nov 2026';
-export const DEPOT = 'Depot Dortmund (fictional)';
+export const TODAY = 'Thursday 5 November 2026';
+export const TODAY_SHORT = 'Thu 5 Nov';
+export const DEPOT = 'Depot Dortmund';
 
 export const trucks: Truck[] = [
   { id: 'E-01', name: 'E-01', brand: 'Brand A', powertrain: 'electric', weightClass: 'heavy', batteryKWh: 440, socPercent: 82, reservePercent: 15, efficiencyKWhPerKm: 1.1, capacityKg: 24000, status: 'available', driverId: 'DR-1' },

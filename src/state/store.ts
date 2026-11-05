@@ -63,8 +63,8 @@ export function reducer(state: AppState, action: Action): AppState {
       const next = replan(state.assignments, contextFor(scenario));
       const replaced = next.filter((a) => a.replaces).length;
       const notice = replaced > 0
-        ? `${action.label}: ${replaced} approved ${replaced === 1 ? 'assignment is' : 'assignments are'} no longer feasible. Review the new proposals marked "Replaces approved".`
-        : `${action.label}: all approved assignments are still feasible. Open proposals were updated.`;
+        ? `${action.label}. ${replaced} approved ${replaced === 1 ? 'job no longer works' : 'jobs no longer work'}; VoltLane proposed a replacement for each. Review them below.`
+        : `${action.label}. Every approved job still works; open proposals were updated.`;
       return { ...state, scenario, assignments: next, notice };
     }
     case 'dismiss':

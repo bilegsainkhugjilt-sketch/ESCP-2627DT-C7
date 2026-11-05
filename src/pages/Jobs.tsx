@@ -20,12 +20,12 @@ export function Jobs({ ctx, assignments, onGenerate }: { ctx: PlanContext; assig
     <>
       <PageHead
         title="Today's jobs"
-        sub={`${ctx.jobs.length} jobs · ${Math.round(totalKm).toLocaleString('en-GB')} km in total · sorted by ${sort === 'distance' ? 'distance (longest first)' : 'time window'}`}
+        sub={`${ctx.jobs.length} jobs, ${Math.round(totalKm).toLocaleString('en-GB')} km in total. Distances are round trips from the depot.`}
         actions={
           <>
-            <Button aria-pressed={sort === 'distance'} onClick={() => setSort('distance')}>Sort by distance</Button>
-            <Button aria-pressed={sort === 'window'} onClick={() => setSort('window')}>Sort by time window</Button>
-            <Button variant="primary" onClick={onGenerate}>{assignments.length ? 'Re-plan open jobs →' : 'Generate plan →'}</Button>
+            <Button aria-pressed={sort === 'distance'} onClick={() => setSort('distance')}>Longest first</Button>
+            <Button aria-pressed={sort === 'window'} onClick={() => setSort('window')}>Earliest first</Button>
+            <Button variant="primary" onClick={onGenerate}>{assignments.length ? 'Re-plan open jobs' : 'Generate plan'}</Button>
           </>
         }
       />
@@ -50,7 +50,7 @@ export function Jobs({ ctx, assignments, onGenerate }: { ctx: PlanContext; assig
               const km = effectiveDistanceKm(j, ctx.scenario);
               return (
                 <tr key={j.id}>
-                  <td><strong>{j.id}</strong></td>
+                  <td className="id">{j.id}</td>
                   <td>{j.route}</td>
                   <td>{km}{km !== j.distanceKm && <span className="small" style={{ color: 'var(--color-warning)' }}> (+detour)</span>}</td>
                   <td>{j.tollRoadKm}</td>
@@ -59,8 +59,8 @@ export function Jobs({ ctx, assignments, onGenerate }: { ctx: PlanContext; assig
                   <td>{j.windowStart}–{j.windowEnd}</td>
                   <td>
                     {!a && <StatusBadge>Unassigned</StatusBadge>}
-                    {a?.status === 'proposed' && <StatusBadge tone="accent">Proposed{a.truckId ? ` · ${a.truckId}` : ''}</StatusBadge>}
-                    {a && a.status !== 'proposed' && <StatusBadge tone="dark">Approved · {a.truckId}</StatusBadge>}
+                    {a?.status === 'proposed' && <StatusBadge tone="neutral">{a.truckId ? `Proposed for ${a.truckId}` : 'No truck free'}</StatusBadge>}
+                    {a && a.status !== 'proposed' && <StatusBadge tone="dark">Approved for {a.truckId}</StatusBadge>}
                   </td>
                 </tr>
               );
@@ -68,7 +68,7 @@ export function Jobs({ ctx, assignments, onGenerate }: { ctx: PlanContext; assig
           </tbody>
         </table>
       </div>
-      <p className="footnote">Jobs and customers are fictional seed data. Distances are round trips from the depot.</p>
+      <p className="footnote">Jobs and customers are fictional.</p>
     </>
   );
 }

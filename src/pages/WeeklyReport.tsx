@@ -1,39 +1,57 @@
 // A5 Weekly report for the head of operations (US-08, FR-19–FR-21, NFR-08).
-import { KpiTile, PageHead, StatusBadge } from '../components/ui';
-import { TODAY } from '../data/seedData';
+// Leads with one plain statement, then three supporting figures, then each truck's use.
+import { PageHead } from '../components/ui';
+import { TODAY_SHORT } from '../data/seedData';
 import { history } from '../data/seedHistory';
 import { weeklyReport } from '../logic/kpis';
 import type { PlanContext } from '../logic/planner';
 import type { Assignment } from '../types/domain';
 
-const eur = (n: number) => `€ ${n.toLocaleString('en-GB')}`;
+const eur = (n: number) => `€${n.toLocaleString('en-GB')}`;
+const km = (n: number) => `${n.toLocaleString('en-GB')} km`;
 
 export function WeeklyReport({ ctx, assignments }: { ctx: PlanContext; assignments: Assignment[] }) {
-  const r = weeklyReport(history, assignments, ctx, TODAY.split(' ').slice(0, 3).join(' '));
+  const r = weeklyReport(history, assignments, ctx, TODAY_SHORT);
+  const share = Math.round(r.electricShare * 100);
+  const under = r.perTruck.filter((p) => p.underUsed).map((p) => p.truck.name);
   return (
     <>
-      <PageHead title="Weekly report · week 45" sub={`Fictional data · all savings are estimates · days included: ${r.days.join(', ')}`} />
-      <div className="tiles">
-        <KpiTile value={`${r.electricKm.toLocaleString('en-GB')} km`} label="driven electric" sub={`of ${r.fleetKm.toLocaleString('en-GB')} km fleet total`} />
-        <KpiTile highlight value={`${Math.round(r.electricShare * 100)}%`} label="of fleet km electric" sub="target: +20% vs baseline (product.md §1.6)" />
-        <KpiTile value={eur(r.tollSavedEur)} label="toll saved (est.)" sub="German rate by weight class" />
-        <KpiTile value={eur(r.energySavedEur)} label="energy cost vs diesel (est.)" sub="saved compared with diesel fuel" />
+      <PageHead title="Weekly report, week 45" sub={`Covers ${r.days.join(', ')}. Fictional data; savings are estimates.`} />
+
+      <p className="statement">
+        <b>{share}%</b> of this week's fleet kilometres were driven electric.
+      </p>
+
+      <div className="figures">
+        <div><b>{km(r.electricKm)}</b><span>driven electric, of {km(r.fleetKm)} in total</span></div>
+        <div><b>{eur(r.tollSavedEur)}</b><span>truck toll not paid (estimate)</span></div>
+        <div><b>{eur(r.energySavedEur)}</b><span>saved on energy compared with diesel (estimate)</span></div>
       </div>
+
       <section className="panel" aria-labelledby="use-title">
-        <h2 id="use-title">Electric km per truck: driven vs possible</h2>
-        {r.perTruck.map((p) => (
-          <div className="use-row" key={p.truck.id}>
-            <strong>{p.truck.name}</strong>
-            <div className="use-track" role="meter" aria-valuemin={0} aria-valuemax={p.possibleKm} aria-valuenow={p.drivenKm} aria-label={`${p.truck.name} ${p.drivenKm} of ${p.possibleKm} km`}>
-              <div className={`use-fill ${p.underUsed ? 'under' : ''}`} style={{ width: `${p.possibleKm ? (p.drivenKm / p.possibleKm) * 100 : 0}%` }} />
+        <h2 id="use-title">How much of each e-truck's battery was used</h2>
+        <p className="muted small" style={{ margin: 0 }}>
+          {under.length
+            ? `${under.join(' and ')} drove less than 60% of what ${under.length === 1 ? 'its battery' : 'their batteries'} allowed. Give ${under.length === 1 ? 'it' : 'them'} longer jobs next week.`
+            : 'Every e-truck used at least 60% of what its battery allowed.'}
+        </p>
+        {r.perTruck.map((p) => {
+          const pct = p.possibleKm ? Math.round((p.drivenKm / p.possibleKm) * 100) : 0;
+          return (
+            <div className="use-row" key={p.truck.id}>
+              <b>{p.truck.name}</b>
+              <div className="use-track" role="meter" aria-valuemin={0} aria-valuemax={p.possibleKm} aria-valuenow={p.drivenKm} aria-label={`${p.truck.name}: ${p.drivenKm} of ${p.possibleKm} km`}>
+                <div className="use-fill" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="num">{p.drivenKm} of {p.possibleKm} km</span>
+              <span className={`use-note ${p.underUsed ? 'under' : ''}`}>{p.underUsed ? `Under-used, ${pct}%` : `${pct}% used`}</span>
             </div>
-            <span className="num">{p.drivenKm} / {p.possibleKm} km</span>
-            <span>{p.underUsed ? <StatusBadge tone="warning">Under-used</StatusBadge> : <StatusBadge tone="success">Well used</StatusBadge>}</span>
-          </div>
-        ))}
+          );
+        })}
       </section>
+
       <p className="footnote">
-        Today counts only assignments you have approved. Toll saved = electric toll-road km × diesel toll for that weight class (34.8 ct/km over 18 t, 17.8 ct/km for 7.5–12 t; e-trucks are toll-free until 30 June 2031). Energy: depot 0.24 €/kWh, public 0.49 €/kWh, vs diesel at an assumed 27 / 18 L per 100 km and 1.45 €/L. "Possible" km = what each truck's battery allowed that day. Under-used = below 60% of possible.
+        Today counts only jobs you approved. Toll = electric toll-road km × the diesel rate for that weight class (34.8 ct/km over 18 t, 17.8 ct/km for 7.5–12 t); e-trucks pay no German toll until 30 June 2031. Energy compares depot power at 0.24 €/kWh and public charging at 0.49 €/kWh with diesel at an assumed 27 or 18 litres per 100 km and 1.45 €/litre. Possible km = what each battery allowed that day.
       </p>
     </>
   );

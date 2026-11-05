@@ -50,9 +50,9 @@ export function ReassignDialog({ job, assignments, ctx, onAssign, onClose }: Pro
         aria-labelledby="reassign-title"
         aria-describedby={warning ? 'reassign-warning' : undefined}
       >
-        <h2 id="reassign-title">Reassign {job.id}</h2>
+        <h2 id="reassign-title">Move {job.id} to another truck</h2>
         <p className="small muted" style={{ margin: 0 }}>
-          {job.route} · {job.distanceKm} km · {(job.payloadKg / 1000).toFixed(1)} t · {job.windowStart}–{job.windowEnd}
+          {job.route}, {job.distanceKm} km, {(job.payloadKg / 1000).toFixed(1)} t, {job.windowStart}–{job.windowEnd}
         </p>
         <fieldset className="options">
           <legend className="sr-only">Choose a truck</legend>
@@ -63,10 +63,10 @@ export function ReassignDialog({ job, assignments, ctx, onAssign, onClose }: Pro
               : !check.allowed
                 ? check.warning
                 : check.warning
-                  ? 'Below safety reserve — needs confirmation'
+                  ? 'Would end below its safety reserve'
                   : truck.powertrain === 'diesel'
-                    ? 'Free at this time'
-                    : `Feasible · arrives with ${Math.round(check.evaluation.reserveAfterPercent ?? 0)}% left${check.evaluation.breakCharge ? ' (with break charge)' : ''}`;
+                    ? 'Free at this time, no battery limit'
+                    : `Can do it, ends with ${Math.round(check.evaluation.reserveAfterPercent ?? 0)}% charge${check.evaluation.breakCharge ? ' after a break charge' : ''}`;
             return (
               <label key={truck.id} className={`option ${disabled ? 'disabled' : ''}`}>
                 <input type="radio" name="truck" value={truck.id} disabled={disabled} checked={choice === truck.id} onChange={() => setChoice(truck.id)} />

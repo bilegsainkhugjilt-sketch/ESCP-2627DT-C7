@@ -47,14 +47,14 @@ The app keeps your plan in the browser (`localStorage`). **Reset demo** (top rig
 
 ## Demo script (about 3 minutes)
 
-1. **Fleet (A1):** 8 fictional trucks — 5 electric across 2 brands, 3 diesel — with battery level, a 15% safety-reserve marker and predicted range.
-2. **Jobs (A2):** 8 fictional jobs, sortable by distance or time window → click **Generate plan**.
-3. **Daily plan (A3):** VoltLane proposes **7 of 8 jobs electric**. Each card explains why, e.g. *"E-03 can do this: needs 182 kWh, has 236 kWh above the 15% reserve, so it arrives with 28% left."* The 330 km job J-07 goes to diesel with the reason shown in red.
-4. **Approve** J-01 and J-04 → they move to the dark *Approved* column.
-5. **Reassign J-08 → E-03**: the dialog warns that E-03 would arrive below its reserve and asks you to confirm (*Assign anyway*). Trucks that cannot do the job (too heavy, busy, in maintenance) are disabled with the reason.
-6. **Simulate → Public charger outage**: jobs that relied on a break charge are re-planned to diesel; approved jobs that still work stay approved. Try **Cold day −5 °C** and **Road closure on J-01** too.
-7. **Charging (A4):** depot charging after the last job; public charging only inside the 45-min driver break. E-05's break charge ends after the driver's shift, so it is flagged with a cheaper depot alternative.
-8. **Weekly report (A5):** electric km driven vs possible per truck (e.g. E-02 flagged as under-used), estimated toll and energy savings. Today counts only approved jobs.
+1. **Fleet:** 8 fictional trucks (5 electric from 2 brands, 3 diesel) with battery level, the 15% safety reserve and approximate range.
+2. **Jobs:** 8 fictional jobs, longest first or earliest first. Click **Generate plan**.
+3. **Daily plan, the dispatch board:** one lane per truck. VoltLane proposes **7 of 8 jobs on electric trucks**. Proposed jobs are *hatched* (pencilled in); on each electric lane a line shows the battery through the day against the dashed reserve. Click a job on the board to jump to its explanation, e.g. *"E-03 can do this: needs 182 kWh, has 236 kWh above the 15% reserve, so it arrives with 28% left."* The 330 km job J-07 goes to a diesel, with the reason.
+4. **Approve** J-01 and J-04: their blocks turn solid ("inked") and move to *Approved*.
+5. **Reassign J-08 to E-03:** the dialog warns that E-03 would end below its reserve and asks you to confirm (*Assign anyway*). Trucks that cannot take the job are disabled with the reason.
+6. **Test a disruption → Charger outage:** jobs that relied on a break charge are re-planned to diesel; approved jobs that still work stay approved. Also try **Cold day, −5 °C** and **Road closure on J-01**.
+7. **Charging:** depot charging after the last job; public charging only inside the 45-minute break. E-05's break charge ends after the driver's shift, so it is flagged with a cheaper depot alternative.
+8. **Weekly report:** one sentence with the electric share of the week, three supporting figures, and each e-truck's battery use (E-02 and E-04 under-used with the starting data).
 
 ---
 
@@ -66,8 +66,8 @@ src/
   data/                    fictional seed data, one past week, constants with evidence IDs
   logic/                   range estimator, planner + re-planner, charging, KPIs (+ tests)
   state/store.ts           app state, localStorage, Reset demo
-  components/              Navigation, TopBar, RecommendationCard, ReassignDialog, basics (+ *.stories.tsx)
-  pages/                   A1 FleetOverview · A2 Jobs · A3 DailyPlan · A4 Charging · A5 WeeklyReport
+  components/              PlanBoard, RecommendationCard (decision rows + EnergyBar), ReassignDialog, Navigation, TopBar, basics (+ *.stories.tsx)
+  pages/                   A1 FleetOverview, A2 Jobs, A3 DailyPlan (dispatch board), A4 Charging, A5 WeeklyReport
   styles/                  tokens.css (from design.md) + app.css
 ```
 

@@ -12,7 +12,7 @@ export function FleetOverview({ ctx, assignments }: { ctx: PlanContext; assignme
     <>
       <PageHead
         title="Fleet overview"
-        sub={`${ctx.trucks.length} trucks · ${electric.length} electric (${brands} brands) · ${ctx.trucks.length - electric.length} diesel`}
+        sub={`${ctx.trucks.length} trucks: ${electric.length} electric from ${brands} brands and ${ctx.trucks.length - electric.length} diesel.`}
       />
       <div className="table-wrap">
         <table>
@@ -35,7 +35,7 @@ export function FleetOverview({ ctx, assignments }: { ctx: PlanContext; assignme
               const jobs = assignments.filter((a) => a.truckId === t.id).map((a) => a.jobId);
               return (
                 <tr key={t.id}>
-                  <td><strong>{t.name}</strong></td>
+                  <td className="id">{t.name}</td>
                   <td>{t.brand}</td>
                   <td><PowertrainTag powertrain={t.powertrain} /></td>
                   <td>{WEIGHT_CLASS_LABEL[t.weightClass]}</td>
@@ -54,7 +54,7 @@ export function FleetOverview({ ctx, assignments }: { ctx: PlanContext; assignme
         </table>
       </div>
       <p className="footnote">
-        Predicted range is an estimate for an empty truck at {ctx.scenario.temperatureC} °C, above a 15% safety reserve (red marker). Heavier loads and colder weather use more energy. All data is fictional.
+        Range is an estimate for an empty truck at {ctx.scenario.temperatureC} °C, counting only the charge above the 15% safety reserve (black marker). Heavier loads and colder weather shorten it. All trucks and figures are fictional.
       </p>
     </>
   );
