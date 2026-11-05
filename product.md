@@ -113,8 +113,3 @@ Electric trucks in Europe go 11–19% further than their makers state (E-10), ye
 
 ---
 
-
-## 4. Skeleton
-*To be completed in the 12:30–13:15 block.*
-- Wireframes per screen (A1 Fleet overview, A2 Jobs, A3 Daily plan, A4 Charging, A5 Weekly report)
-- Navigation design
