@@ -77,7 +77,7 @@ Requirement IDs from `product.md` (US-xx, FR-xx, NFR-xx) are referenced in code 
 
 ## 3D models and credits
 
-The A1 fleet page shows the depot in 3D with [three.js](https://threejs.org) via React Three Fiber. The truck models are from the **Kenney Car Kit** by Kenney (www.kenney.nl), licensed **CC0** (public domain); the licence file is in `public/models/`. They are bundled with the app, so the 3D view also makes no network calls. If a browser has WebGL switched off, A1 falls back to the truck buttons, the detail panel and the table.
+The A1 fleet page shows the depot in 3D with [three.js](https://threejs.org) via React Three Fiber. The truck models are from the **Kenney Car Kit** by Kenney (www.kenney.nl), licensed **CC0** (public domain); the licence file is in `src/assets/models/`. They are bundled with the app, so the 3D view also makes no network calls. If a browser has WebGL switched off, A1 falls back to the truck buttons, the detail panel and the table.
 
 ## Assumptions in the rules engine
 

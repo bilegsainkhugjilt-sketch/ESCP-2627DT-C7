@@ -1,5 +1,5 @@
 // A1 night depot: the fleet as 3D trucks parked in their bays (US-01, FR-01–FR-03).
-// Models: Kenney Car Kit (CC0, www.kenney.nl), served locally from /public/models — no network (NFR-09).
+// Models: Kenney Car Kit (CC0, www.kenney.nl), bundled into the app as data URLs — no network (NFR-09).
 // Colours come from the CSS tokens at runtime, so the 3D scene follows design.md like the rest of the app.
 import { Grid, OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
@@ -8,13 +8,16 @@ import { Suspense, useEffect, useMemo, useRef, useState, type RefObject } from '
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import type { Truck } from '../types/domain';
+import deliveryFlat from '../assets/models/delivery-flat.glb?inline';
+import delivery from '../assets/models/delivery.glb?inline';
+import heavyRigid from '../assets/models/garbage-truck.glb?inline';
 
-const BASE = import.meta.env.BASE_URL;
+
 const MODEL = {
-  heavyEv: `${BASE}models/garbage-truck.glb`,
-  mediumEv: `${BASE}models/delivery.glb`,
-  heavyDiesel: `${BASE}models/delivery-flat.glb`,
-  mediumDiesel: `${BASE}models/delivery-flat.glb`,
+  heavyEv: heavyRigid,
+  mediumEv: delivery,
+  heavyDiesel: deliveryFlat,
+  mediumDiesel: deliveryFlat,
 };
 Object.values(MODEL).forEach((m) => useGLTF.preload(m, false));
 
