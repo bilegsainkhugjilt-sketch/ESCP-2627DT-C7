@@ -113,3 +113,209 @@ Electric trucks in Europe go 11–19% further than their makers state (E-10), ye
 
 ---
 
+## 2. Scope
+
+The prototype covers **8 user stories** across 5 screens. Everything runs on fictional data with no external APIs (§1.9).
+
+### 2.1 Functional specifications
+
+| # | User story | Functional requirements | Non-functional requirements | Screens |
+|---|---|---|---|---|
+| US-01 | As a dispatcher, I want to see each truck's battery level, predicted range and safety reserve, so I know which jobs each e-truck can safely do. *(UN-01)* | **FR-01** The system must list all trucks with brand, powertrain, weight class and status. **FR-02** For each e-truck, the system must show battery level (%), usable energy above the reserve (kWh) and predicted range (km). **FR-03** Predicted range must adjust for temperature and load. | **NFR-01** Range is always labelled as an estimate. **NFR-02** Status is shown with text and icon, never colour alone. | A1 |
+| US-02 | As a dispatcher, I want to see today's jobs with distance, load and time window, so I can judge what needs planning. *(UN-02)* | **FR-04** The system must list jobs with distance, toll-road km, payload, stops and time window. **FR-05** The dispatcher must be able to sort jobs by distance and time window. | — | A2 |
+| US-03 | As a dispatcher, I want one plan for the whole mixed fleet that puts suitable jobs on e-trucks first, so the e-trucks drive as much as they safely can. *(UN-02)* | **FR-06** The system must generate a proposed plan for all jobs with one action. **FR-07** Jobs are matched longest first to the feasible e-truck with the smallest remaining margin (architecture.md §7). **FR-08** Jobs no e-truck can do go to diesel trucks. | **NFR-03** A plan for up to 50 jobs is generated in under 2 seconds. | A3 |
+| US-04 | As a dispatcher, I want to see why each truck was suggested, so I can trust or question the plan. *(UN-03)* | **FR-09** Each proposal must show energy needed, energy available and battery reserve on arrival. **FR-10** Each job not given to an e-truck must show the reason (range, payload or availability). | **NFR-04** Explanations are one sentence in plain language, without technical jargon. | A3 |
+| US-05 | As a dispatcher, I want to approve or change any suggestion, so I stay in control of the final plan. *(UN-03)* | **FR-11** The dispatcher must be able to approve one proposal or all of them. **FR-12** The dispatcher must be able to reassign a job to another truck. **FR-13** If a reassignment is not feasible, the system must warn and ask for explicit confirmation. | **NFR-05** Proposed and approved assignments always look different. | A3 |
+| US-06 | As a dispatcher, I want charging planned in depot time and drivers' legal breaks, so charging doesn't add extra stops. *(UN-04)* | **FR-14** The system must schedule depot charging first. **FR-15** Public charging may only be planned inside a 45-minute driver break. **FR-16** The system must flag any charging that would end after the driver's shift. | **NFR-06** Break rules follow Reg. 561/2006 (45 min after 4.5 h of driving). | A4 |
+| US-07 | As a dispatcher, I want to re-plan quickly when a delivery runs late or a charger fails, so the day stays on track. *(UN-05)* | **FR-17** The dispatcher must be able to trigger a simulated delay or charger outage. **FR-18** The system must draft a revised plan that again requires approval. | **NFR-07** A re-plan never changes approved assignments without confirmation. | A3, A4 |
+| US-08 | As a head of operations, I want a weekly report on e-truck use and savings, so I can see whether the e-trucks pay off. *(UN-06)* | **FR-19** The report must show e-km driven, share of fleet km driven electric, and e-km possible vs. driven. **FR-20** The report must estimate toll saved using the rate for each truck's weight class. **FR-21** The report must compare energy cost with a diesel equivalent. | **NFR-08** All figures are labelled as estimates based on fictional data. | A5 |
+
+**Requirements for the whole prototype**
+- **NFR-09** No external APIs and no real data; all data comes from local seed files.
+- **NFR-10** Desktop-first layout, at least 1280 px wide.
+- **NFR-11** Keyboard-operable controls and WCAG AA contrast.
+- **NFR-12** Plans persist in the browser; a **Reset demo** button restores the seed data.
+
+### 2.2 Content requirements
+
+| Content | Where | Source / owner |
+|---|---|---|
+| 8 fictional trucks (5 electric across 2 brands, 3 diesel) | A1 | `seedData.ts` |
+| 6–12 fictional jobs for one working day | A2, A3 | `seedData.ts` |
+| Depot and public chargers with power and price | A4 | `seedData.ts`; prices from E-22 |
+| Explanation sentences (feasible, infeasible, overridden) | A3 | Text templates in `planner.ts` |
+| One fictional past week of approved assignments | A5 | `seedHistory.ts` |
+| Toll rates and energy prices | A5 | `constants.ts`; values from E-05, E-22 |
+| Short glossary: battery level, reserve, e-km share | Tooltips | design.md |
+
+### 2.3 Out of scope for the prototype
+Real maps and routing, live charger booking, login and user roles, multiple depots, driver app, billing.
+
+## 3. Structure
+
+### 3.1 Interaction design: daily planning flow
+
+```mermaid
+flowchart TD
+    A[A1 Fleet overview] --> B[A2 Today's jobs]
+    B --> C[Generate plan]
+    C --> D[A3 Proposed plan with explanations]
+    D --> E{Dispatcher decision}
+    E -->|Approve| F[Approved plan]
+    E -->|Reassign| G{Feasible?}
+    G -->|Yes| F
+    G -->|No| H[Warning: confirm or cancel]
+    H -->|Confirm| F
+    H -->|Cancel| D
+    F --> I[A4 Charging schedule]
+    I --> J{Disruption? delay or charger outage}
+    J -->|Yes| K[Draft revised plan] --> E
+    J -->|No| L[A5 Weekly report]
+```
+
+**Key interaction rules**
+- The system **proposes**; only the dispatcher **approves** (UN-03, KI-03).
+- Every re-plan returns to the decision step; nothing changes silently (NFR-07).
+- An infeasible choice is allowed but never hidden: it needs explicit confirmation (FR-13).
+
+### 3.2 Information architecture
+
+**Navigation:** a left sidebar with five items in working order: *Fleet (A1) → Jobs (A2) → Daily plan (A3) → Charging (A4) → Weekly report (A5)*. A top bar shows the date, the scenario (temperature) and the **Reset demo** button.
+
+**Data model** (matches architecture.md §5):
+
+```mermaid
+erDiagram
+    TRUCK ||--o{ ASSIGNMENT : "is given"
+    JOB ||--o| ASSIGNMENT : "is covered by"
+    DRIVER ||--o{ ASSIGNMENT : drives
+    CHARGER |o--o{ ASSIGNMENT : "charging stop"
+    TRUCK {
+        string id
+        string brand
+        string powertrain
+        string weightClass
+        number batteryKWh
+        number socPercent
+        number reservePercent
+        number efficiencyKWhPerKm
+        number capacityKg
+        string status
+    }
+    JOB {
+        string id
+        string customer
+        number distanceKm
+        number tollRoadKm
+        number payloadKg
+        number stops
+        string windowStart
+        string windowEnd
+    }
+    DRIVER {
+        string id
+        string name
+        string shiftStart
+        string shiftEnd
+    }
+    CHARGER {
+        string id
+        string kind
+        number powerKw
+        number pricePerKWh
+        boolean available
+    }
+    ASSIGNMENT {
+        string jobId
+        string truckId
+        string driverId
+        string status
+        string explanation
+        number reserveAfterPercent
+    }
+```
+
+Each job has at most one assignment; a truck and a driver can have several per day; an assignment may include one charging stop.
+
+## 4. Skeleton
+
+Low-fidelity wireframes for the five screens. Visual styling (colour, type, components) is in `design.md`.
+
+**Figma wireframes (A1–A5, desktop 1440 × 900):** [VoltLane — Skeleton wireframes](https://www.figma.com/design/rUYDqDUAa8etl3w6t6hFu9)
+
+The Figma file is the visual reference; the text wireframes below describe the same screens for the coding agent.
+
+### 4.1 Navigation design
+- **Sidebar (always visible):** VoltLane logo · Fleet (A1) · Jobs (A2) · Daily plan (A3) · Charging (A4) · Weekly report (A5). The active item has a lime marker.
+- **Top bar:** today's date · scenario (temperature, active events) · **Reset demo**.
+- **Main route through the app:** A1 → A2 → A3 (core screen) → A4 → A5. Every screen is also reachable directly from the sidebar.
+
+### 4.2 Interface and information design per screen
+
+**A1 Fleet overview** (US-01)
+```text
+┌──────────┬──────────────────────────────────────────────────────────────┐
+│ VoltLane │ Thu 5 Nov · 4 °C · no events                   [Reset demo]  │
+│          ├──────────────────────────────────────────────────────────────┤
+│ ▌Fleet   │ Fleet overview                       8 trucks · 5 electric   │
+│  Jobs    │ ┌──────┬────────┬──────────┬───────┬─────────────────┬──────┐│
+│  Plan    │ │Truck │ Brand  │ Type     │ Class │ Battery / range │Status││
+│  Charging│ ├──────┼────────┼──────────┼───────┼─────────────────┼──────┤│
+│  Report  │ │ E-01 │ Brand A│ ⚡Electric│ >18 t │ ████████░ 82%   │Avail.││
+│          │ │      │        │          │       │ ~255 km (±est.) │      ││
+│          │ │ E-02 │ Brand B│ ⚡Electric│7.5–12t│ ███░░░░░░ 34% ⚠ │Charg.││
+│          │ │ D-01 │ Brand A│ Diesel   │ >18 t │ —               │Avail.││
+│          │ └──────┴────────┴──────────┴───────┴─────────────────┴──────┘│
+└──────────┴──────────────────────────────────────────────────────────────┘
+```
+
+**A2 Today's jobs** (US-02)
+```text
+│ Today's jobs                     8 jobs · 612 km total    Sort: [Distance ▾] │
+│ ┌──────┬───────────────────────┬────────┬────────┬───────┬──────────────┐  │
+│ │ Job  │ Route (fictional)     │ km     │ Load   │ Stops │ Time window  │  │
+│ │ J-04 │ Dortmund → Bochum     │ 148    │ 6.2 t  │ 3     │ 07:00–11:00  │  │
+│ │ J-07 │ Dortmund → Münster    │ 182    │ 8.4 t  │ 2     │ 08:00–14:00  │  │
+│ └──────┴───────────────────────┴────────┴────────┴───────┴──────────────┘  │
+│                                                       [ Generate plan → ]   │
+```
+
+**A3 Daily plan, core screen** (US-03, US-04, US-05, US-07)
+```text
+│ Daily plan          6 of 8 jobs electric (75% of km)   [Approve all feasible]│
+│ Scenario: [Delay J-02] [Charger outage] [Cold −5 °C]                         │
+│ ┌ - - - - - - - - - - - - - - - - - - ┐ ┌──────────────────────────────────┐ │
+│   PROPOSED · J-04 → E-03 ⚡  ● Feasible  │ ✓ APPROVED · J-01 → E-01 ⚡       │ │
+│   "Needs 182 kWh, has 236 kWh above     │ Arrives with 31% left.           │ │
+│    reserve; arrives with 23% left."     └──────────────────────────────────┘ │
+│   [Approve] [Reassign…]                 ┌──────────────────────────────────┐ │
+│ └ - - - - - - - - - - - - - - - - - - ┘ │ ✕ J-07 → D-02 Diesel             │ │
+│                                         │ "Too heavy for free e-trucks      │ │
+│                                         │  (8.4 t vs 7.0 t)."              │ │
+│                                         └──────────────────────────────────┘ │
+```
+Proposed cards (dashed) and approved cards (solid, dark) are visually separate. A disruption creates new proposed cards; approved ones stay unchanged until confirmed.
+
+**A4 Charging** (US-06)
+```text
+│ Charging schedule — Depot Dortmund (fictional)                               │
+│ 06:00     08:00     10:00     12:00     14:00     16:00     18:00            │
+│ E-01 ████ depot                          ▒▒ break charge (public, 45 min)    │
+│ E-02 ██████████ depot                                                         │
+│ E-05                      ▒▒ public, in break       ⚠ ends after shift       │
+│ Legend: ████ depot  ▒▒ public in driver break  ⚠ needs attention            │
+```
+
+**A5 Weekly report** (US-08)
+```text
+│ Weekly report · week 45 (fictional data, estimates)                          │
+│ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌──────────────────┐           │
+│ │ 3,420 km   │ │ 58%        │ │ € 1,010    │ │ € 640            │           │
+│ │ electric   │ │ of fleet km│ │ toll saved │ │ energy vs diesel │           │
+│ │ +18% vs wk │ │ electric   │ │ (est.)     │ │ (est.)           │           │
+│ └────────────┘ └────────────┘ └────────────┘ └──────────────────┘           │
+│ Per truck: e-km driven vs possible                                           │
+│ E-01 ███████████████░░░  412 / 480 km                                        │
+│ E-02 ████████░░░░░░░░░░  220 / 455 km   ← under-used                          │
+```
+All report figures are illustrative examples from fictional data.
